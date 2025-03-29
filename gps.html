@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker GPS en Tiempo Real</title>
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <style>
+        /* Estilos Responsivos */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .data-label {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .data-value {
+            font-family: 'Courier New', monospace;
+        }
+        
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        #connection-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .connected {
+            background-color: #4cc9f0;
+            color: white;
+        }
+        
+        .disconnected {
+            background-color: #f72585;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            #map {
+                height: 300px;
+            }
+            
+            .data-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-map-marked-alt"></i> Tracker GPS</h1>
+            <div id="connection-status" class="disconnected">
+                <i class="fas fa-plug"></i> Desconectado
+            </div>
+        </header>
+        
+        <div class="data-card">
+            <div class="data-row">
+                <span class="data-label">Latitud:</span>
+                <span class="data-value" id="lat">0.000000</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Longitud:</span>
+                <span class="data-value" id="lng">0.000000</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Altitud:</span>
+                <span class="data-value" id="alt">0.00 m</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Satélites:</span>
+                <span class="data-value" id="sats">0</span>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+
+    <!-- Scripts ESENCIALES (orden crítico) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    
+    <script>
+        // ===== Configuración MQTT =====
+        const clientId = 'web_' + Math.random().toString(16).substr(2, 8);
+        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt", {
+            clientId: clientId,
+            clean: true,
+            reconnectPeriod: 1000
+        });
+        
+        const topic = "gps/tracker";
+        
+        // ===== Elementos del DOM =====
+        const latElement = document.getElementById("lat");
+        const lngElement = document.getElementById("lng");
+        const altElement = document.getElementById("alt");
+        const satsElement = document.getElementById("sats");
+        const connStatus = document.getElementById("connection-status");
+        
+        // ===== Configuración del Mapa =====
+        let map;
+        let marker;
+        
+        function initMap() {
+            if (typeof L === 'undefined') {
+                console.error("Leaflet no está cargado");
+                return;
+            }
+            
+            map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+            
+            marker = L.marker([0, 0]).addTo(map);
+            marker.bindPopup("<b>Posición inicial</b>").openPopup();
+        }
+        
+        // ===== Manejo de MQTT =====
+        client.on('connect', () => {
+            console.log("Conectado al broker MQTT");
+            connStatus.className = "connected";
+            connStatus.innerHTML = '<i class="fas fa-plug"></i> Conectado';
+            client.subscribe(topic);
+        });
+        
+        client.on('error', (err) => {
+            console.error("Error MQTT:", err);
+            connStatus.className = "disconnected";
+            connStatus.innerHTML = '<i class="fas fa-plug"></i> Error';
+        });
+        
+        client.on('message', (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+                
+                // Actualizar UI
+                latElement.textContent = data.lat.toFixed(6);
+                lngElement.textContent = data.lng.toFixed(6);
+                altElement.textContent = data.alt.toFixed(2) + " m";
+                satsElement.textContent = data.sats;
+                
+                // Actualizar mapa
+                if (map && marker) {
+                    const newPos = [data.lat, data.lng];
+                    marker.setLatLng(newPos);
+                    map.setView(newPos, 15);
+                    marker.bindPopup(`
+                        <b>Ubicación actual</b><br>
+                        Lat: ${data.lat.toFixed(6)}<br>
+                        Lng: ${data.lng.toFixed(6)}<br>
+                        Alt: ${data.alt.toFixed(2)} m
+                    `).openPopup();
+                }
+                
+            } catch (e) {
+                console.error("Error al procesar mensaje:", e);
+            }
+        });
+        
+        // ===== Inicialización =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+        });
+    </script>
+</body>
+</html>
+
+</body>
+</html>
