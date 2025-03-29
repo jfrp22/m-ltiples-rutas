@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acerca de - Tracker GPS</title>
+    <!-- Mismos estilos que en index.html -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        nav {
+            background: var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        
+        .about-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            color: var(--primary);
+            margin-right: 15px;
+            margin-top: 3px;
+        }
+        
+        .feature-text h3 {
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            nav a {
+                display: block;
+                margin: 10px 0;
+                text-align: center;
+            }
+            
+            .about-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-info-circle"></i> Acerca del Proyecto</h1>
+        </header>
+        
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
+            <a href="about.html"><i class="fas fa-info-circle"></i> Acerca de</a>
+        </nav>
+        
+        <div class="about-card">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-satellite"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>Sistema de Tracker GPS</h3>
+                    <p>Proyecto desarrollado con ESP8266 y módulo GPS NEO-6M para seguimiento en tiempo real mediante MQTT y visualización en mapa interactivo.</p>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>Tecnologías Utilizadas</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>ESP8266 con firmware Arduino</li>
+                        <li>Protocolo MQTT (broker público Mosquitto)</li>
+                        <li>Frontend con HTML5, CSS3 y Leaflet.js</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>Desarrollador</h3>
+                    <p>Proyecto creado por [Tu Nombre] como parte de un sistema IoT para seguimiento de dispositivos.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Tracker GPS Project | Versión 1.0</p>
+        </footer>
+    </div>
+</body>
+</html>
