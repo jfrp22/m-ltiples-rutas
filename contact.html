@@ -1,0 +1,38 @@
+<!-- Ejemplo: contact.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Mismo head que about.html -->
+    <title>Contacto - Tracker GPS</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-envelope"></i> Contacto</h1>
+        </header>
+        
+        <nav>
+            <!-- Mismo menú de navegación -->
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
+            <a href="about.html"><i class="fas fa-info-circle"></i> Acerca de</a>
+            <a href="contact.html" class="active"><i class="fas fa-envelope"></i> Contacto</a>
+        </nav>
+        
+        <div class="about-card">  <!-- Reutiliza la misma clase -->
+            <h2 style="margin-bottom: 20px;"><i class="fas fa-paper-plane"></i> Formulario de Contacto</h2>
+            
+            <form style="display: grid; gap: 15px;">
+                <input type="text" placeholder="Nombre" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                <input type="email" placeholder="Email" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                <textarea placeholder="Mensaje" rows="5" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;"></textarea>
+                <button type="submit" style="background: #4361ee; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </form>
+        </div>
+        
+        <!-- Mismo footer que about.html -->
+    </div>
+</body>
+</html>
