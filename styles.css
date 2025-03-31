@@ -20,6 +20,12 @@ nav a {
     font-weight: bold;
 }
 
+nav a.active {
+    background: #3a0ca3;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
 .route {
     padding: 20px;
     background: white;
