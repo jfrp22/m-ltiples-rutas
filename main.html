@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contenido Protegido</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <meta http-equiv="refresh" content="0; url=login.html">
+    <title>Mi Sitio</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="assets/auth.js"></script>
 </head>
 <body>
@@ -14,16 +15,21 @@
             window.location.href = "login.html";
         }
     </script>
-
-    <header>
-        <h1>Bienvenido al Área Protegida</h1>
-        <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
-    </header>
     
-    <main>
+    <nav>
+    <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+    <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
+    <a href="about.html"><i class="fas fa-info-circle"></i> Acerca de</a>
+    <a href="contact.html"><i class="fas fa-envelope"></i> Contacto</a>
+    <a href="dispositivos.html"><i class="fas fa-list"></i> Nodos</a>
+    </nav>
+    
+    <div class="content">
+        <h1>Bienvenido</h1>
+        <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
         <p>Este contenido solo es visible para usuarios autenticados.</p>
-    </main>
-
+    </div>
+    
     <script>
         function logout() {
             clearAuth();
@@ -32,3 +38,4 @@
     </script>
 </body>
 </html>
+
