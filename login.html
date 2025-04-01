@@ -16,17 +16,14 @@
             <p id="errorMsg" class="error"></p>
         </form>
     </div>
-
     <script src="assets/auth.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            
             if (authenticate(username, password)) {
-                const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
-                window.location.href = redirect;
+                window.location.href = 'main.html'; // Redirige al contenido real
             } else {
                 document.getElementById('errorMsg').textContent = "Credenciales incorrectas";
             }
