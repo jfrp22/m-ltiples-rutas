@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Restringido</title>
+    <title>Login</title>
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <h1><i class="icon-lock"></i> Acceso Requerido</h1>
+    <div class="login-container">
+        <h1>🔒 Acceso Restringido</h1>
         <form id="loginForm">
             <input type="text" id="username" placeholder="Usuario" required>
             <input type="password" id="password" placeholder="Contraseña" required>
@@ -16,14 +16,19 @@
             <p id="errorMsg" class="error"></p>
         </form>
     </div>
+
+    <!-- CryptoJS para hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="assets/auth.js"></script>
+    
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            
             if (authenticate(username, password)) {
-                window.location.href = 'main.html'; // Redirige al contenido real
+                window.location.href = "main.html";
             } else {
                 document.getElementById('errorMsg').textContent = "Credenciales incorrectas";
             }
