@@ -29,12 +29,20 @@ function clearAuth() {
     localStorage.removeItem('auth');
 }
 
+// Versión con logs para depuración
 function authenticate(username, password) {
+    console.log("Usuario ingresado:", username);
+    console.log("Contraseña ingresada:", password);
+    
     const md5Password = CryptoJS.MD5(password).toString();
+    console.log("Hash generado:", md5Password);
     
     if (validUsers[username] === md5Password) {
+        console.log("¡Autenticación exitosa!");
         setAuth(username);
         return true;
+    } else {
+        console.log("Hash esperado para", username, ":", validUsers[username]);
+        return false;
     }
-    return false;
 }
