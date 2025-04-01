@@ -29,10 +29,14 @@ function clearAuth() {
 }
 
 function authenticate(username, password) {
-    // En un caso real, usa SHA-256 o similar
+    console.log("Usuario ingresado:", username); // Depuración
+    console.log("Contraseña ingresada:", password);
+    
     const md5Password = CryptoJS.MD5(password).toString();
+    console.log("MD5 generado:", md5Password); // Debe coincidir con el hash almacenado
     
     if (validUsers[username] === md5Password) {
+        console.log("¡Autenticación exitosa!");
         setAuth(username);
         return true;
     }
