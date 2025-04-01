@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=login.html">
     <title>Mi Sitio</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/style.css">
     <script src="assets/auth.js"></script>
-</head>
-<body>
     <script>
-        // Verificación de autenticación
-        if (!checkAuth()) {
-            window.location.href = "login.html";
-        }
+        // Verificación UNICA al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = "login.html";
+            } else {
+                // Mostrar contenido solo si está autenticado
+                document.body.style.display = 'block';
+            }
+        });
     </script>
-    
+</head>
+<body style="display:none"> <!-- Oculta inicialmente -->
+        
     <nav>
     <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
     <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
@@ -24,12 +27,15 @@
     <a href="dispositivos.html"><i class="fas fa-list"></i> Nodos</a>
     </nav>
     
-    <div class="content">
+    <header>
         <h1>Bienvenido</h1>
-        <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
-        <p>Este contenido solo es visible para usuarios autenticados.</p>
-    </div>
+        <button onclick="logout()">Cerrar Sesión</button>
+    </header>
     
+    <main>
+        <p>Este es tu contenido protegido.</p>
+    </main>
+
     <script>
         function logout() {
             clearAuth();
@@ -38,4 +44,3 @@
     </script>
 </body>
 </html>
-
