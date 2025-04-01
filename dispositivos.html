@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dispositivos Conectados</title>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #4361ee; color: white; }
+        .online { color: green; }
+        .offline { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Dispositivos IoT Conectados</h1>
+    <table id="devices">
+        <thead>
+            <tr>
+                <th>MAC Address</th>
+                <th>Estado</th>
+                <th>Última Actividad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se llenarán con JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const devices = {}; // Almacena los dispositivos { mac: { lastSeen, status } }
+
+        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+
+        client.on('connect', () => {
+            client.subscribe("dispositivos/heartbeat");
+            console.log("Conectado al broker MQTT");
+        });
+
+        client.on('message', (topic, message) => {
+            const mac = message.toString();
+            devices[mac] = { 
+                lastSeen: new Date(), 
+                status: 'online' 
+            };
+            updateTable();
+        });
+
+        function updateTable() {
+            const tbody = document.querySelector('#devices tbody');
+            tbody.innerHTML = '';
+            
+            // Marcar como offline si no hay señal en 2 minutos
+            const now = new Date();
+            Object.keys(devices).forEach(mac => {
+                if ((now - new Date(devices[mac].lastSeen)) > 120000) {
+                    devices[mac].status = 'offline';
+                }
+            });
+
+            // Generar filas de la tabla
+            Object.entries(devices).forEach(([mac, data]) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${mac}</td>
+                    <td class="${data.status}">${data.status.toUpperCase()}</td>
+                    <td>${data.lastSeen.toLocaleTimeString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar cada 10 segundos
+        setInterval(updateTable, 10000);
+    </script>
+</body>
+</html>
