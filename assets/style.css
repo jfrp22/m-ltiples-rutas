@@ -7,8 +7,8 @@ body {
     color: #333;
 }
 
-/* Contenedor de autenticación */
-.auth-container {
+/* Login */
+.login-container {
     max-width: 400px;
     margin: 100px auto;
     padding: 30px;
@@ -18,13 +18,6 @@ body {
     text-align: center;
 }
 
-/* Página 404 */
-.error-container {
-    text-align: center;
-    margin-top: 100px;
-}
-
-/* Elementos de formulario */
 input, button {
     width: 100%;
     padding: 12px;
@@ -38,8 +31,25 @@ button {
     background-color: #4361ee;
     color: white;
     cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #3a0ca3;
 }
 
 .error {
     color: #dc3545;
+    height: 20px;
+}
+
+/* Contenido protegido */
+.logout-btn {
+    width: auto;
+    padding: 8px 16px;
+    background-color: #dc3545;
+}
+
+.logout-btn:hover {
+    background-color: #a71d2a;
 }
