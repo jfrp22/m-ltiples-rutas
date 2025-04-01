@@ -1,31 +1,30 @@
+// Credenciales (versión texto plano para pruebas)
 const validUsers = {
-    admin: "admin123", // Texto plano (solo para pruebas)
+    admin: "admin123",
     user: "password"
 };
 
-// Almacenamiento seguro
+// Sistema de autenticación mejorado
+let authChecked = false;
+
 function setAuth(user) {
-    const authData = {
-        user: user,
-        timestamp: Date.now(),
-        token: btoa(user + ":" + validUsers[user])
-    };
-    localStorage.setItem('auth', JSON.stringify(authData));
+    sessionStorage.setItem('auth', 'true'); // Usa sessionStorage
+    sessionStorage.setItem('user', user);
 }
 
 function checkAuth() {
-    const authData = JSON.parse(localStorage.getItem('auth'));
-    if (!authData) return false;
+    if (authChecked) return true; // Evita múltiples verificaciones
     
-    // Verificar token y expiración (24 horas)
-    const expectedToken = btoa(authData.user + ":" + validUsers[authData.user]);
-    const isExpired = (Date.now() - authData.timestamp) > 86400000;
+    const isAuthenticated = sessionStorage.getItem('auth') === 'true';
+    authChecked = true;
     
-    return authData.token === expectedToken && !isExpired;
+    return isAuthenticated;
 }
 
 function clearAuth() {
-    localStorage.removeItem('auth');
+    sessionStorage.removeItem('auth');
+    sessionStorage.removeItem('user');
+    authChecked = false;
 }
 
 function authenticate(username, password) {
