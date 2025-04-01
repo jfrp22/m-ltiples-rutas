@@ -3,7 +3,7 @@ const validUsers = {
     admin: 'a66d94e0b6ab781584c0a5c7d7f8282e', // MD5 de "admin123"
     user: '5f4dcc3b5aa765d61d8327deb882cf99'  // MD5 de "password"
 };
-
+ 
 // Almacenamiento seguro (encriptación básica)
 function setAuth(user) {
     const authData = {
