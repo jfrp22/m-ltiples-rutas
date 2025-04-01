@@ -1,7 +1,6 @@
-// Credenciales válidas (hash MD5)
 const validUsers = {
-    admin: "a66d94e0b6ab781584c0a5c7d7f8282e", // MD5 de "admin123"
-    user: "5f4dcc3b5aa765d61d8327deb882cf99"   // MD5 de "password"
+    admin: "admin123", // Texto plano (solo para pruebas)
+    user: "password"
 };
 
 // Almacenamiento seguro
@@ -29,20 +28,10 @@ function clearAuth() {
     localStorage.removeItem('auth');
 }
 
-// Versión con logs para depuración
 function authenticate(username, password) {
-    console.log("Usuario ingresado:", username);
-    console.log("Contraseña ingresada:", password);
-    
-    const md5Password = CryptoJS.MD5(password).toString();
-    console.log("Hash generado:", md5Password);
-    
-    if (validUsers[username] === md5Password) {
-        console.log("¡Autenticación exitosa!");
+    if (validUsers[username] === password) {
         setAuth(username);
         return true;
-    } else {
-        console.log("Hash esperado para", username, ":", validUsers[username]);
-        return false;
     }
+    return false;
 }
