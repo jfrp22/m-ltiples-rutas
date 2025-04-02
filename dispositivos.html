@@ -1,33 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dispositivos Conectados</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #4361ee; color: white; }
-        .online { color: green; }
-        .offline { color: red; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* Ancho mínimo antes de aparecer scroll */
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #4361ee;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .online {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .offline {
+            color: red;
+            font-weight: bold;
+        }
+        
+        /* Estilos para móviles */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            
+            .table-container {
+                border: 1px solid #ddd;
+            }
+        }
+        
+        /* Estilos para pantallas muy pequeñas */
+        @media screen and (max-width: 480px) {
+            th, td {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Dispositivos IoT Conectados</h1>
-    <table id="devices">
-        <thead>
-            <tr>
-                <th>MAC Address</th>
-                <th>Estado</th>
-                <th>Última Actividad</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Los datos se llenarán con JavaScript -->
-        </tbody>
-    </table>
+    
+    <div class="table-container">
+        <table id="devices">
+            <thead>
+                <tr>
+                    <th>MAC Address</th>
+                    <th>Estado</th>
+                    <th>Última Actividad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se llenarán con JavaScript -->
+            </tbody>
+        </table>
+    </div>
 
     <script>
         const devices = {}; // Almacena los dispositivos { mac: { lastSeen, status } }
@@ -66,7 +141,10 @@
                 
                 row.innerHTML = `
                     <td>${mac}</td>
-                    <td class="${data.status}">${data.status.toUpperCase()}</td>
+                    <td class="${data.status}">
+                        <i class="fas fa-${data.status === 'online' ? 'check-circle' : 'times-circle'}"></i>
+                        ${data.status.toUpperCase()}
+                    </td>
                     <td>${data.lastSeen.toLocaleTimeString()}</td>
                 `;
                 
@@ -76,6 +154,9 @@
 
         // Actualizar cada 10 segundos
         setInterval(updateTable, 10000);
+        
+        // Ejecutar updateTable al cargar la página
+        window.addEventListener('DOMContentLoaded', updateTable);
     </script>
 </body>
 </html>
