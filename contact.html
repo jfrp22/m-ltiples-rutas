@@ -44,18 +44,35 @@
             margin-bottom: 15px;
         }
         
-        nav {
+         nav {
             background: var(--primary);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 20px;
         }
         
         nav a {
             color: white;
             text-decoration: none;
-            margin: 0 15px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+         nav a:hover, nav a.active {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        nav a i {
+            font-size: 1rem;
         }
         
         .about-card {
