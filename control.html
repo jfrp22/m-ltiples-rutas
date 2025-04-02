@@ -246,7 +246,7 @@
         </nav>
         
         <header>
-            <h1><i class="fas fa-cogs"></i> Control de Servomotores</h1>
+            <h1><i class="fas fa-cogs"></i> Control manual de alineacion</h1>
             <div id="connection-status" class="disconnected">
                 <i class="fas fa-plug"></i> Desconectado
             </div>
@@ -254,7 +254,7 @@
         
         <div class="servo-container">
             <div class="servo-card">
-                <h3><i class="fas fa-robot"></i> Servo 1</h3>
+                <h3><i class="fas fa-robot"></i> Elevacion</h3>
                 <input type="range" min="0" max="180" value="90" class="servo-slider" id="servo1">
                 <div class="servo-value" id="servo1-value">90°</div>
                 <button class="btn" onclick="centerServo('servo1')">
@@ -263,7 +263,7 @@
             </div>
             
             <div class="servo-card">
-                <h3><i class="fas fa-robot"></i> Servo 2</h3>
+                <h3><i class="fas fa-robot"></i> Azimut</h3>
                 <input type="range" min="0" max="180" value="90" class="servo-slider" id="servo2">
                 <div class="servo-value" id="servo2-value">90°</div>
                 <button class="btn" onclick="centerServo('servo2')">
