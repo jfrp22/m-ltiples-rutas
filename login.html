@@ -4,7 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        input {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4361ee;
+        }
+
+        button {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3a0ca3;
+        }
+
+        .error {
+            color: #e63946;
+            font-size: 14px;
+            margin-top: -10px;
+            min-height: 20px;
+        }
+
+        /* Animación */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos para móviles */
+        @media screen and (max-width: 480px) {
+            .login-container {
+                padding: 25px 20px;
+                border-radius: 10px;
+            }
+            
+            input, button {
+                padding: 12px;
+                font-size: 15px;
+            }
+            
+            h1 {
+                margin-bottom: 20px;
+            }
+            
+            form {
+                gap: 15px;
+            }
+        }
+
+        /* Estilos para pantallas muy pequeñas */
+        @media screen and (max-width: 320px) {
+            .login-container {
+                padding: 20px 15px;
+            }
+            
+            input, button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -19,22 +133,40 @@
 
     <!-- CryptoJS para hashing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="assets/auth.js"></script>
-   <script>
-       document.getElementById('loginForm').addEventListener('submit', function(e) {
-           e.preventDefault();
-           const username = document.getElementById('username').value.trim();
-           const password = document.getElementById('password').value.trim();
-           if (authenticate(username, password)) {
-               // Redirige con retraso para visualizar feedback
-               document.getElementById('errorMsg').textContent = "Acceso concedido...";
-               setTimeout(() => {
-                   window.location.href = "main.html";
-               }, 800); // 0.8 segundos de delay
-           } else {
-               document.getElementById('errorMsg').textContent = "Credenciales incorrectas";
-           }
-       });
-   </script>
+    <script>
+        // Función de autenticación de ejemplo (deberías reemplazarla con tu lógica real)
+        function authenticate(username, password) {
+            // Esta es solo una implementación de ejemplo
+            // En un caso real, deberías comparar con credenciales almacenadas de forma segura
+            const hashedPassword = CryptoJS.SHA256(password).toString();
+            return username === "admin" && hashedPassword === "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824";
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (authenticate(username, password)) {
+                // Feedback visual y redirección
+                document.getElementById('errorMsg').textContent = "Acceso concedido...";
+                document.getElementById('errorMsg').style.color = "#2a9d8f";
+                document.querySelector('button').style.backgroundColor = "#2a9d8f";
+                
+                setTimeout(() => {
+                    window.location.href = "main.html";
+                }, 800);
+            } else {
+                document.getElementById('errorMsg').textContent = "Credenciales incorrectas";
+                document.getElementById('errorMsg').style.color = "#e63946";
+                
+                // Efecto de sacudida para indicar error
+                this.classList.add('shake');
+                setTimeout(() => {
+                    this.classList.remove('shake');
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>
