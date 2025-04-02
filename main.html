@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Sitio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Área Protegida</title>
     <style>
-        :root {
+     :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
             --light: #f8f9fa;
@@ -172,38 +171,40 @@
                 width: 100%;
                 padding: 12px;
             }
-        }
-    </style>
+        }    </style>
     <script>
-        // Función de ejemplo para verificar autenticación
+        // Función mejorada para verificar autenticación
         function checkAuth() {
-            // Esta es solo una implementación de ejemplo
-            // En un caso real, deberías verificar un token o sesión válida
-            return localStorage.getItem('authenticated') === 'true';
+            const authTimestamp = localStorage.getItem('authTimestamp');
+            const isAuthenticated = localStorage.getItem('authenticated') === 'true';
+            
+            // Verificar si la autenticación es reciente (menos de 8 horas)
+            const isRecent = authTimestamp && (Date.now() - parseInt(authTimestamp)) < (8 * 60 * 60 * 1000);
+            
+            return isAuthenticated && isRecent;
         }
-        
-        // Función de ejemplo para limpiar autenticación
-        function clearAuth() {
-            localStorage.removeItem('authenticated');
-        }
-        
-        // Verificación al cargar
+
         document.addEventListener('DOMContentLoaded', function() {
             if (!checkAuth()) {
+                // Limpiar y redirigir si no está autenticado
+                localStorage.removeItem('authenticated');
+                localStorage.removeItem('authTimestamp');
                 window.location.href = "login.html";
             } else {
+                // Mostrar contenido solo si está autenticado
                 document.body.style.display = 'block';
             }
         });
-        
+
         function logout() {
-            clearAuth();
+            localStorage.removeItem('authenticated');
+            localStorage.removeItem('authTimestamp');
             window.location.href = "login.html";
         }
     </script>
 </head>
 <body style="display:none">
-    <div class="container">
+  <div class="container">
         <nav>
             <a href="main.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
