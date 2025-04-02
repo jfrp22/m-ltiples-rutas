@@ -136,20 +136,25 @@
         
         <div class="about-card">  <!-- Reutiliza la misma clase -->
             <h2 style="margin-bottom: 20px;"><i class="fas fa-paper-plane"></i>Contacto</h2>
+        
+        <form class="contact-form" action="https://formsubmit.co/esp8266tg@gmail.com" method="POST">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" value="https://jfrp22.github.io/m-ltiples-rutas/404.html">
             
-            <form style="display: grid; gap: 15px;">
-                <input type="text" placeholder="Nombre" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                <input type="email" placeholder="Email" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                <textarea placeholder="Mensaje" rows="5" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;"></textarea>
-                <button type="submit" style="background: #4361ee; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-paper-plane"></i> Enviar
-                </button>
-            </form>
-        </div>
-        <footer>
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Nombre" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Correo electrónico" required>
+            </div>
+            <div class="form-group">
+                <textarea name="message" placeholder="Mensaje" rows="5" required></textarea>
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+                <footer>
             <p>© 2025 Tracker | Versión 1.0</p>
         </footer>
-        <!-- Mismo footer que about.html -->
     </div>
 </body>
 </html>
