@@ -130,7 +130,7 @@
             // Marcar como offline si no hay señal en 2 minutos
             const now = new Date();
             Object.keys(devices).forEach(mac => {
-                if ((now - new Date(devices[mac].lastSeen)) > 120000) {
+                if ((now - new Date(devices[mac].lastSeen)) > 30000) {
                     devices[mac].status = 'offline';
                 }
             });
