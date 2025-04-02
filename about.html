@@ -57,6 +57,11 @@
             font-weight: 500;
         }
         
+        nav a:hover, nav a.active {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }        
+        
         .about-card {
             background: white;
             border-radius: 10px;
@@ -110,7 +115,7 @@
         <nav>
             <a href="main.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
-            <a href="about.html"><i class="fas fa-info-circle"></i> Acerca de</a>
+            <a href="about.html" class="active"><i class="fas fa-info-circle"></i> Acerca de</a>
             <a href="contact.html"><i class="fas fa-envelope"></i> Contacto</a>
             <a href="dispositivos.html"><i class="fas fa-list"></i> Nodos</a>
         </nav>
