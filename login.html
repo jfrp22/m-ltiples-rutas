@@ -131,15 +131,20 @@
         </form>
     </div>
 
-    <!-- CryptoJS para hashing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // Función de autenticación de ejemplo (deberías reemplazarla con tu lógica real)
+        // Función de autenticación mejorada
         function authenticate(username, password) {
-            // Esta es solo una implementación de ejemplo
-            // En un caso real, deberías comparar con credenciales almacenadas de forma segura
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            return username === "admin" && hashedPassword === "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824";
+            const isValid = username === "admin" && 
+                          hashedPassword === "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824";
+            
+            if(isValid) {
+                // Guardar estado de autenticación
+                localStorage.setItem('authenticated', 'true');
+                localStorage.setItem('authTimestamp', Date.now());
+            }
+            return isValid;
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -148,7 +153,6 @@
             const password = document.getElementById('password').value.trim();
             
             if (authenticate(username, password)) {
-                // Feedback visual y redirección
                 document.getElementById('errorMsg').textContent = "Acceso concedido...";
                 document.getElementById('errorMsg').style.color = "#2a9d8f";
                 document.querySelector('button').style.backgroundColor = "#2a9d8f";
@@ -159,12 +163,8 @@
             } else {
                 document.getElementById('errorMsg').textContent = "Credenciales incorrectas";
                 document.getElementById('errorMsg').style.color = "#e63946";
-                
-                // Efecto de sacudida para indicar error
                 this.classList.add('shake');
-                setTimeout(() => {
-                    this.classList.remove('shake');
-                }, 500);
+                setTimeout(() => this.classList.remove('shake'), 500);
             }
         });
     </script>
