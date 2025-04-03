@@ -99,7 +99,7 @@
         }
         
         #map {
-            height: 70vh;
+            height: 75vh;
             min-height: 400px;
             width: 100%;
             border-radius: 10px;
@@ -172,37 +172,6 @@
         .device-btn i {
             font-size: 0.9rem;
         }
-        
-        .info-panel {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .info-row:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .info-value {
-            color: var(--dark);
-        }
 
         @media (max-width: 768px) {
             body {
@@ -214,7 +183,7 @@
             }
             
             #map {
-                height: 60vh;
+                height: 65vh;
             }
         }
         
@@ -230,7 +199,7 @@
             }
             
             #map {
-                height: 50vh;
+                height: 55vh;
                 min-height: 300px;
             }
             
@@ -264,29 +233,6 @@
             </div>
             
             <div id="map"></div>
-            
-            <div class="info-panel" id="device-info">
-                <div class="info-row">
-                    <span class="info-label">Dispositivo seleccionado:</span>
-                    <span class="info-value" id="selected-device">Ninguno</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Última actualización:</span>
-                    <span class="info-value" id="last-update">--</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Coordenadas:</span>
-                    <span class="info-value" id="coordinates">--</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Altitud:</span>
-                    <span class="info-value" id="altitude">--</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Satélites:</span>
-                    <span class="info-value" id="satellites">--</span>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -316,15 +262,6 @@
         const connStatus = document.getElementById("connection-status");
         const deviceButtonsContainer = document.getElementById("device-buttons");
         
-        // Elementos del panel de información
-        const infoElements = {
-            device: document.getElementById("selected-device"),
-            update: document.getElementById("last-update"),
-            coords: document.getElementById("coordinates"),
-            altitude: document.getElementById("altitude"),
-            satellites: document.getElementById("satellites")
-        };
-
         // Inicializar mapa
         function initMap() {
             map = L.map('map').setView([19.4326, -99.1332], 12); // Centro inicial en CDMX
@@ -411,21 +348,6 @@
                 map.setView(devices[mac].marker.getLatLng(), 15);
                 devices[mac].marker.openPopup();
                 activeDevice = mac;
-                
-                // Actualizar panel de información
-                updateInfoPanel(mac);
-            }
-        }
-        
-        // Actualizar el panel de información
-        function updateInfoPanel(mac) {
-            if (devices[mac]) {
-                const device = devices[mac];
-                infoElements.device.textContent = mac;
-                infoElements.update.textContent = device.lastUpdate.toLocaleString();
-                infoElements.coords.textContent = `${device.lastData.lat.toFixed(6)}, ${device.lastData.lng.toFixed(6)}`;
-                infoElements.altitude.textContent = `${device.lastData.alt.toFixed(2)} metros`;
-                infoElements.satellites.textContent = device.lastData.sats;
             }
         }
         
