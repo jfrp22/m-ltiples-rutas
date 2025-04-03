@@ -171,6 +171,7 @@
                         <th>MAC Address</th>
                         <th>Estado</th>
                         <th>Última Actividad</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -181,22 +182,56 @@
     </div>
 
     <script>
-        const devices = {}; // Almacena los dispositivos { mac: { lastSeen, status } }
+        const devices = {}; // Almacena los dispositivos { mac: { lastSeen, status, data } }
 
-        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+        // Conexión MQTT para heartbeat
+        const heartbeatClient = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+        
+        // Conexión MQTT para datos GPS (usando el mismo broker)
+        const gpsClient = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
 
-        client.on('connect', () => {
-            client.subscribe("dispositivos/heartbeat");
-            console.log("Conectado al broker MQTT");
+        // Suscribirse a los topics necesarios
+        heartbeatClient.on('connect', () => {
+            heartbeatClient.subscribe("dispositivos/heartbeat");
+            console.log("Conectado al broker MQTT (heartbeat)");
         });
 
-        client.on('message', (topic, message) => {
+        gpsClient.on('connect', () => {
+            console.log("Conectado al broker MQTT (GPS data)");
+        });
+
+        // Procesar mensajes de heartbeat
+        heartbeatClient.on('message', (topic, message) => {
             const mac = message.toString();
-            devices[mac] = { 
-                lastSeen: new Date(), 
-                status: 'online' 
-            };
+            if (!devices[mac]) {
+                devices[mac] = { 
+                    lastSeen: new Date(), 
+                    status: 'online',
+                    data: null
+                };
+                // Suscribirse a los datos GPS de este dispositivo
+                gpsClient.subscribe(`gps/${mac}`);
+            } else {
+                devices[mac].lastSeen = new Date();
+                devices[mac].status = 'online';
+            }
             updateTable();
+        });
+
+        // Procesar mensajes de datos GPS
+        gpsClient.on('message', (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+                const mac = topic.split('/')[1]; // Extraer MAC del topic gps/[MAC]
+                
+                if (devices[mac]) {
+                    devices[mac].data = data;
+                    devices[mac].lastSeen = new Date();
+                    updateTable();
+                }
+            } catch (e) {
+                console.error("Error al procesar mensaje GPS:", e);
+            }
         });
 
         function updateTable() {
@@ -206,33 +241,75 @@
             // Marcar como offline si no hay señal en 2 minutos
             const now = new Date();
             Object.keys(devices).forEach(mac => {
-                if ((now - new Date(devices[mac].lastSeen)) > 30000) {
+                if ((now - new Date(devices[mac].lastSeen)) > 120000) {
                     devices[mac].status = 'offline';
                 }
             });
 
             // Generar filas de la tabla
-            Object.entries(devices).forEach(([mac, data]) => {
+            Object.entries(devices).forEach(([mac, deviceData]) => {
                 const row = document.createElement('tr');
                 
                 row.innerHTML = `
                     <td>${mac}</td>
-                    <td class="${data.status}">
-                        <i class="fas fa-${data.status === 'online' ? 'check-circle' : 'times-circle'}"></i>
-                        ${data.status.toUpperCase()}
+                    <td class="${deviceData.status}">
+                        <i class="fas fa-${deviceData.status === 'online' ? 'check-circle' : 'times-circle'}"></i>
+                        ${deviceData.status.toUpperCase()}
                     </td>
-                    <td>${data.lastSeen.toLocaleTimeString()}</td>
+                    <td>${deviceData.lastSeen.toLocaleTimeString()}</td>
+                    <td>
+                        <button onclick="viewDevice('${mac}')" class="view-btn">
+                            <i class="fas fa-map-marker-alt"></i> Ver Ubicación
+                        </button>
+                    </td>
                 `;
                 
                 tbody.appendChild(row);
             });
         }
 
-        // Actualizar cada 1 segundos
+        function viewDevice(mac) {
+            if (devices[mac] && devices[mac].data) {
+                const gpsData = devices[mac].data;
+                alert(`Ubicación de ${mac}:\n` +
+                      `Lat: ${gpsData.lat.toFixed(6)}\n` +
+                      `Lng: ${gpsData.lng.toFixed(6)}\n` +
+                      `Alt: ${gpsData.alt.toFixed(2)} m\n` +
+                      `Satélites: ${gpsData.sats}`);
+            } else {
+                alert(`No hay datos GPS disponibles para ${mac}`);
+            }
+        }
+
+        // Actualizar cada 1 segundo
         setInterval(updateTable, 1000);
         
         // Ejecutar updateTable al cargar la página
         window.addEventListener('DOMContentLoaded', updateTable);
+
+        // Estilo para el botón (sin afectar el diseño original)
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .view-btn {
+                    background: var(--primary);
+                    color: white;
+                    border: none;
+                    padding: 8px 12px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                .view-btn:hover {
+                    background: var(--secondary);
+                }
+                .view-btn i {
+                    font-size: 12px;
+                }
+            </style>
+        `);
     </script>
 </body>
 </html>
