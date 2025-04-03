@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker GPS</title>
-    <!-- Hojas de estilo -->
+    <title>Tracker GPS Multi-Dispositivo</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
     <style>
-        /* Estilos Responsivos Mejorados */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -65,7 +62,7 @@
             transition: background 0.3s;
         }
         
-         nav a:hover, nav a.active {
+        nav a:hover, nav a.active {
             background: var(--secondary);
             transform: translateY(-2px);
         }
@@ -124,7 +121,33 @@
             color: white;
         }
 
-        /* Media Queries para mejor adaptación */
+        .device-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .device-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .device-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .device-btn.active {
+            background: var(--secondary);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--secondary);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -146,13 +169,18 @@
                 height: 60vh;
                 min-height: 300px;
             }
+            
+            .device-controls {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-map-marked-alt"></i> Tracker GPS</h1>
+            <h1><i class="fas fa-map-marked-alt"></i> Tracker GPS Multi-Dispositivo</h1>
         </header>
         <nav>
             <a href="main.html"><i class="fas fa-home"></i> Inicio</a>
@@ -166,17 +194,25 @@
             <div id="connection-status" class="disconnected">
                 <i class="fas fa-plug"></i> Desconectado
             </div>
+            
+            <div class="device-controls" id="device-buttons">
+                <!-- Los botones de dispositivos se generarán dinámicamente -->
+            </div>
           
             <div id="map"></div>
         </div>
     </div>
 
-    <!-- Scripts ESENCIALES (orden crítico) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     
     <script>
-        // ===== Configuración MQTT =====
+        // Objeto para almacenar los dispositivos y sus marcadores
+        const devices = {};
+        let map;
+        let activeDevice = null;
+        
+        // Configuración MQTT
         const clientId = 'web_' + Math.random().toString(16).substr(2, 8);
         const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt", {
             clientId: clientId,
@@ -185,30 +221,73 @@
         });
         
         const topic = "gps/tracker";
-        
-        // ===== Elementos del DOM =====
         const connStatus = document.getElementById("connection-status");
-        
-        // ===== Configuración del Mapa =====
-        let map;
-        let marker;
-        
+        const deviceButtonsContainer = document.getElementById("device-buttons");
+
+        // Inicializar mapa
         function initMap() {
-            if (typeof L === 'undefined') {
-                console.error("Leaflet no está cargado");
-                return;
-            }
-            
             map = L.map('map').setView([0, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
-            
-            marker = L.marker([0, 0]).addTo(map);
-            marker.bindPopup("<b>Posición inicial</b>").openPopup();
         }
-        
-        // ===== Manejo de MQTT =====
+
+        // Crear o actualizar marcador para un dispositivo
+        function updateDeviceMarker(mac, data) {
+            if (!devices[mac]) {
+                // Crear nuevo marcador
+                const marker = L.marker([data.lat, data.lng], {
+                    title: `Dispositivo: ${mac}`,
+                    riseOnHover: true
+                }).addTo(map);
+                
+                // Crear botón para este dispositivo
+                const btn = document.createElement('button');
+                btn.className = 'device-btn';
+                btn.textContent = `Dispositivo ${mac.substring(0, 6)}`;
+                btn.dataset.mac = mac;
+                btn.onclick = () => focusDevice(mac);
+                deviceButtonsContainer.appendChild(btn);
+                
+                devices[mac] = {
+                    marker: marker,
+                    button: btn,
+                    lastData: data
+                };
+            } else {
+                // Actualizar marcador existente
+                devices[mac].marker.setLatLng([data.lat, data.lng]);
+                devices[mac].lastData = data;
+            }
+            
+            // Actualizar popup con la información más reciente
+            devices[mac].marker.bindPopup(`
+                <b>Dispositivo:</b> ${mac}<br>
+                <b>Última actualización:</b> ${new Date().toLocaleTimeString()}<br>
+                <b>Lat:</b> ${data.lat.toFixed(6)}<br>
+                <b>Lng:</b> ${data.lng.toFixed(6)}<br>
+                <b>Alt:</b> ${data.alt.toFixed(2)} m<br>
+                <b>Satélites:</b> ${data.sats}
+            `);
+        }
+
+        // Enfocar un dispositivo específico en el mapa
+        function focusDevice(mac) {
+            if (devices[mac]) {
+                // Actualizar botones
+                document.querySelectorAll('.device-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                devices[mac].button.classList.add('active');
+                
+                // Centrar mapa en este dispositivo
+                map.setView(devices[mac].marker.getLatLng(), 15);
+                devices[mac].marker.openPopup();
+                activeDevice = mac;
+            }
+        }
+
+        // Manejo de conexión MQTT
         client.on('connect', () => {
             console.log("Conectado al broker MQTT");
             connStatus.className = "connected";
@@ -225,27 +304,26 @@
         client.on('message', (topic, message) => {
             try {
                 const data = JSON.parse(message.toString());
+                const mac = data.mac; // Asumiendo que el mensaje incluye la MAC
                 
-                // Actualizar mapa
-                if (map && marker) {
-                    const newPos = [data.lat, data.lng];
-                    marker.setLatLng(newPos);
-                    map.setView(newPos, 15);
-                    marker.bindPopup(`
-                        <b>Ubicación actual</b><br>
-                        Lat: ${data.lat.toFixed(6)}<br>
-                        Lng: ${data.lng.toFixed(6)}<br>
-                        Alt: ${data.alt.toFixed(2)} m<br>
-                        Satélites: ${data.sats}
-                    `).openPopup();
+                if (!mac) {
+                    console.error("Mensaje sin identificador MAC");
+                    return;
+                }
+                
+                updateDeviceMarker(mac, data);
+                
+                // Si es el primer dispositivo o el dispositivo activo, enfocarlo
+                if (Object.keys(devices).length === 1 || mac === activeDevice) {
+                    focusDevice(mac);
                 }
                 
             } catch (e) {
                 console.error("Error al procesar mensaje:", e);
             }
         });
-        
-        // ===== Inicialización =====
+
+        // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
         });
