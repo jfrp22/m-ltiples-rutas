@@ -448,18 +448,6 @@
             
             client.subscribe(gpsTopic, { qos: 1 });
             client.subscribe(macListTopic, { qos: 1 });
-            
-            // Ejemplo de datos para prueba (eliminar en producción)
-            if (Object.keys(devices).length === 0) {
-                console.log("Modo demostración: mostrando dispositivo de ejemplo");
-                const demoMac = 'A1:B2:C3:D4:E5:F6';
-                const demoData = {
-                    mac: demoMac,
-                    lat: 19.4326 + (Math.random() * 0.01 - 0.005),
-                    lng: -99.1332 + (Math.random() * 0.01 - 0.005),
-                    alt: 2240 + Math.floor(Math.random() * 100),
-                    sats: 8 + Math.floor(Math.random() * 5)
-                };
                 
                 updateDeviceMarker(demoMac, demoData);
                 focusDevice(demoMac);
