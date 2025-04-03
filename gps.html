@@ -205,11 +205,28 @@
         </nav>
         
         <div class="content">
-            <header>
-                <div id="connection-status" class="disconnected">
-                    <i class="fas fa-plug"></i> Desconectado
+            <div class="data-card">
+                <div class="data-row">
+                    <span class="data-label">Latitud:</span>
+                    <span class="data-value" id="lat">0.000000</span>
                 </div>
-            </header>
+                <div class="data-row">
+                    <span class="data-label">Longitud:</span>
+                    <span class="data-value" id="lng">0.000000</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Altitud:</span>
+                    <span class="data-value" id="alt">0.00 m</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Satélites:</span>
+                    <span class="data-value" id="sats">0</span>
+                </div>
+            </div>
+            
+            <div id="connection-status" class="disconnected">
+                <i class="fas fa-plug"></i> Desconectado
+            </div>
           
             <div id="map"></div>
         </div>
