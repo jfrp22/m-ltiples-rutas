@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
     <title>Dispositivos Conectados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
@@ -29,11 +30,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: #f5f5f5;
         }
         
         .container {
             width: 100%;
             max-width: 1000px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         
         h1 {
@@ -66,7 +72,7 @@
             gap: 8px;
             padding: 5px 10px;
             border-radius: 5px;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         
         nav a:hover, nav a.active {
@@ -99,7 +105,7 @@
         }
         
         th {
-            background-color: #4361ee;
+            background-color: var(--primary);
             color: white;
             position: sticky;
             top: 0;
@@ -119,6 +125,22 @@
             font-weight: bold;
         }
         
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .online .status-indicator {
+            background-color: green;
+        }
+        
+        .offline .status-indicator {
+            background-color: red;
+        }
+        
         @media screen and (max-width: 768px) {
             nav a {
                 display: block;
@@ -130,13 +152,13 @@
                 padding: 10px;
             }
             
+            .container {
+                padding: 15px;
+            }
+            
             th, td {
                 padding: 8px 10px;
                 font-size: 14px;
-            }
-            
-            .table-container {
-                border: 1px solid #ddd;
             }
         }
         
@@ -151,7 +173,7 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-info-circle"></i> Dispositivos IoT Conectados</h1>
+            <h1><i class="fas fa-network-wired"></i> Dispositivos IoT Conectados</h1>
         </header>
         
         <nav>
@@ -177,58 +199,84 @@
                 </tbody>
             </table>
         </div>
+        
+        <div id="connection-status" style="text-align: center; margin-top: 10px; padding: 8px; border-radius: 5px; background: #f0f0f0;">
+            <i class="fas fa-plug"></i> Conectando al servidor MQTT...
+        </div>
     </div>
 
     <script>
         const devices = {}; // Almacena los dispositivos { mac: { lastSeen, status, data } }
+        const statusElement = document.getElementById('connection-status');
 
-        // Conexión MQTT para heartbeat
-        const heartbeatClient = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
-        
-        // Conexión MQTT para datos GPS (usando el mismo broker)
-        const gpsClient = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+        // Configuración MQTT
+        const options = {
+            keepalive: 60,
+            clean: true,
+            reconnectPeriod: 1000,
+            connectTimeout: 30 * 1000,
+            clientId: 'webclient_' + Math.random().toString(16).substr(2, 8)
+        };
 
-        // Suscribirse a los topics necesarios
-        heartbeatClient.on('connect', () => {
-            heartbeatClient.subscribe("dispositivos/heartbeat");
-            console.log("Conectado al broker MQTT (heartbeat)");
+        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt", options);
+
+        // Manejo de conexión
+        client.on('connect', () => {
+            console.log("Conectado al broker MQTT");
+            statusElement.innerHTML = '<i class="fas fa-plug"></i> Conectado al servidor MQTT';
+            statusElement.style.background = '#d4edda';
+            statusElement.style.color = '#155724';
+            
+            client.subscribe("dispositivos/heartbeat", { qos: 1 });
+            client.subscribe("gps/#", { qos: 1 });
         });
 
-        gpsClient.on('connect', () => {
-            console.log("Conectado al broker MQTT (GPS data)");
+        client.on('error', (err) => {
+            console.error("Error MQTT:", err);
+            statusElement.innerHTML = '<i class="fas fa-plug"></i> Error de conexión MQTT';
+            statusElement.style.background = '#f8d7da';
+            statusElement.style.color = '#721c24';
         });
 
-        // Procesar mensajes de heartbeat
-        heartbeatClient.on('message', (topic, message) => {
-            const mac = message.toString();
-            if (!devices[mac]) {
-                devices[mac] = { 
-                    lastSeen: new Date(), 
-                    status: 'online',
-                    data: null
-                };
-                // Suscribirse a los datos GPS de este dispositivo
-                gpsClient.subscribe(`gps/${mac}`);
-            } else {
-                devices[mac].lastSeen = new Date();
-                devices[mac].status = 'online';
-            }
-            updateTable();
+        client.on('reconnect', () => {
+            statusElement.innerHTML = '<i class="fas fa-plug"></i> Reconectando...';
+            statusElement.style.background = '#fff3cd';
+            statusElement.style.color = '#856404';
         });
 
-        // Procesar mensajes de datos GPS
-        gpsClient.on('message', (topic, message) => {
+        // Procesar mensajes
+        client.on('message', (topic, message) => {
             try {
-                const data = JSON.parse(message.toString());
-                const mac = topic.split('/')[1]; // Extraer MAC del topic gps/[MAC]
-                
-                if (devices[mac]) {
-                    devices[mac].data = data;
-                    devices[mac].lastSeen = new Date();
+                if (topic === "dispositivos/heartbeat") {
+                    const mac = message.toString();
+                    console.log("Heartbeat recibido de:", mac);
+                    
+                    if (!devices[mac]) {
+                        devices[mac] = { 
+                            lastSeen: new Date(), 
+                            status: 'online',
+                            data: null
+                        };
+                    } else {
+                        devices[mac].lastSeen = new Date();
+                        devices[mac].status = 'online';
+                    }
+                    
                     updateTable();
+                    
+                } else if (topic.startsWith("gps/")) {
+                    const mac = topic.split('/')[1];
+                    const data = JSON.parse(message.toString());
+                    console.log("Datos GPS recibidos de:", mac, data);
+                    
+                    if (devices[mac]) {
+                        devices[mac].data = data;
+                        devices[mac].lastSeen = new Date();
+                        updateTable();
+                    }
                 }
             } catch (e) {
-                console.error("Error al procesar mensaje GPS:", e);
+                console.error("Error al procesar mensaje:", e);
             }
         });
 
@@ -236,27 +284,27 @@
             const tbody = document.querySelector('#devices tbody');
             tbody.innerHTML = '';
             
-            // Marcar como offline si no hay señal en 2 minutos
-            const now = new Date();
-            Object.keys(devices).forEach(mac => {
-                if ((now - new Date(devices[mac].lastSeen)) > 120000) {
-                    devices[mac].status = 'offline';
+            // Ordenar dispositivos por estado (online primero) y luego por MAC
+            const sortedDevices = Object.entries(devices).sort((a, b) => {
+                if (a[1].status === b[1].status) {
+                    return a[0].localeCompare(b[0]);
                 }
+                return a[1].status === 'online' ? -1 : 1;
             });
 
             // Generar filas de la tabla
-            Object.entries(devices).forEach(([mac, deviceData]) => {
+            sortedDevices.forEach(([mac, deviceData]) => {
                 const row = document.createElement('tr');
                 
                 row.innerHTML = `
                     <td>${mac}</td>
                     <td class="${deviceData.status}">
-                        <i class="fas fa-${deviceData.status === 'online' ? 'check-circle' : 'times-circle'}"></i>
-                        ${deviceData.status.toUpperCase()}
+                        <span class="status-indicator"></span>
+                        ${deviceData.status === 'online' ? 'ONLINE' : 'OFFLINE'}
                     </td>
-                    <td>${deviceData.lastSeen.toLocaleTimeString()}</td>
+                    <td>${deviceData.lastSeen.toLocaleTimeString()} - ${deviceData.lastSeen.toLocaleDateString()}</td>
                     <td>
-                        <button onclick="viewDevice('${mac}')" class="view-btn">
+                        <button onclick="viewDevice('${mac}')" class="view-btn" ${deviceData.data ? '' : 'disabled'}>
                             <i class="fas fa-map-marker-alt"></i> Ver Ubicación
                         </button>
                     </td>
@@ -267,7 +315,9 @@
 
             // Publicar la lista de MACs conectadas
             const connectedMacs = Object.keys(devices).filter(mac => devices[mac].status === 'online');
-            heartbeatClient.publish("dispositivos/lista", JSON.stringify(connectedMacs));
+            if (connectedMacs.length > 0) {
+                client.publish("dispositivos/lista", JSON.stringify(connectedMacs), { qos: 1 });
+            }
         }
 
         function viewDevice(mac) {
@@ -277,19 +327,63 @@
                       `Lat: ${gpsData.lat.toFixed(6)}\n` +
                       `Lng: ${gpsData.lng.toFixed(6)}\n` +
                       `Alt: ${gpsData.alt.toFixed(2)} m\n` +
-                      `Satélites: ${gpsData.sats}`);
+                      `Satélites: ${gpsData.sats}\n` +
+                      `Última actualización: ${new Date(devices[mac].lastSeen).toLocaleString()}`);
             } else {
                 alert(`No hay datos GPS disponibles para ${mac}`);
             }
         }
 
-        // Actualizar cada 1 segundo
-        setInterval(updateTable, 1000);
-        
-        // Ejecutar updateTable al cargar la página
-        window.addEventListener('DOMContentLoaded', updateTable);
+        // Verificar dispositivos offline cada 30 segundos
+        setInterval(() => {
+            const now = new Date();
+            let needUpdate = false;
+            
+            Object.keys(devices).forEach(mac => {
+                if ((now - new Date(devices[mac].lastSeen)) > 120000) {
+                    if (devices[mac].status !== 'offline') {
+                        devices[mac].status = 'offline';
+                        needUpdate = true;
+                    }
+                }
+            });
+            
+            if (needUpdate) {
+                updateTable();
+            }
+        }, 30000);
 
-        // Estilo para el botón (sin afectar el diseño original)
+        // Inicializar tabla al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            updateTable();
+            
+            // Ejemplo de datos para prueba (eliminar en producción)
+            if (Object.keys(devices).length === 0) {
+                console.log("Modo demostración: mostrando dispositivos de ejemplo");
+                const demoMacs = [
+                    'A1:B2:C3:D4:E5:F6', 
+                    'B2:C3:D4:E5:F6:A1', 
+                    'C3:D4:E5:F6:A1:B2'
+                ];
+                
+                demoMacs.forEach((mac, i) => {
+                    devices[mac] = {
+                        lastSeen: new Date(Date.now() - (i * 30000)),
+                        status: i === 0 ? 'online' : 'offline',
+                        data: i === 0 ? {
+                            lat: 19.4326 + (Math.random() * 0.01 - 0.005),
+                            lng: -99.1332 + (Math.random() * 0.01 - 0.005),
+                            alt: 2240 + Math.floor(Math.random() * 100),
+                            sats: 8 + Math.floor(Math.random() * 5)
+                        } : null
+                    };
+                });
+                
+                updateTable();
+            }
+        });
+
+        // Estilo para el botón
         document.head.insertAdjacentHTML('beforeend', `
             <style>
                 .view-btn {
@@ -303,9 +397,16 @@
                     display: flex;
                     align-items: center;
                     gap: 5px;
+                    transition: all 0.3s;
                 }
-                .view-btn:hover {
+                .view-btn:hover:not(:disabled) {
                     background: var(--secondary);
+                    transform: translateY(-1px);
+                }
+                .view-btn:disabled {
+                    background: #cccccc;
+                    cursor: not-allowed;
+                    opacity: 0.7;
                 }
                 .view-btn i {
                     font-size: 12px;
