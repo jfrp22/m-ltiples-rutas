@@ -220,7 +220,8 @@
             reconnectPeriod: 1000
         });
         
-        const topic = "gps/tracker";
+        const gpsTopic = "gps/tracker";
+        const macListTopic = "dispositivos/lista";
         const connStatus = document.getElementById("connection-status");
         const deviceButtonsContainer = document.getElementById("device-buttons");
 
@@ -292,7 +293,8 @@
             console.log("Conectado al broker MQTT");
             connStatus.className = "connected";
             connStatus.innerHTML = '<i class="fas fa-plug"></i> Conectado';
-            client.subscribe(topic);
+            client.subscribe(gpsTopic);
+            client.subscribe(macListTopic); // Suscribirse a la lista de MACs
         });
         
         client.on('error', (err) => {
@@ -303,21 +305,31 @@
         
         client.on('message', (topic, message) => {
             try {
-                const data = JSON.parse(message.toString());
-                const mac = data.mac; // Asumiendo que el mensaje incluye la MAC
-                
-                if (!mac) {
-                    console.error("Mensaje sin identificador MAC");
-                    return;
+                if (topic === macListTopic) {
+                    // Recibimos la lista de MACs conectadas
+                    const macList = JSON.parse(message.toString());
+                    console.log("Dispositivos conectados:", macList);
+                    
+                    // Opcional: Actualizar interfaz con dispositivos conectados
+                    // Puedes agregar lógica aquí para mostrar solo los dispositivos conectados
+                    
+                } else if (topic === gpsTopic) {
+                    // Procesar datos GPS como antes
+                    const data = JSON.parse(message.toString());
+                    const mac = data.mac;
+                    
+                    if (!mac) {
+                        console.error("Mensaje sin identificador MAC");
+                        return;
+                    }
+                    
+                    updateDeviceMarker(mac, data);
+                    
+                    // Si es el primer dispositivo o el dispositivo activo, enfocarlo
+                    if (Object.keys(devices).length === 1 || mac === activeDevice) {
+                        focusDevice(mac);
+                    }
                 }
-                
-                updateDeviceMarker(mac, data);
-                
-                // Si es el primer dispositivo o el dispositivo activo, enfocarlo
-                if (Object.keys(devices).length === 1 || mac === activeDevice) {
-                    focusDevice(mac);
-                }
-                
             } catch (e) {
                 console.error("Error al procesar mensaje:", e);
             }
