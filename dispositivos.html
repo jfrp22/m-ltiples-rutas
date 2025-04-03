@@ -119,7 +119,6 @@
             font-weight: bold;
         }
         
-        /* Estilos para móviles */
         @media screen and (max-width: 768px) {
             nav a {
                 display: block;
@@ -141,7 +140,6 @@
             }
         }
         
-        /* Estilos para pantallas muy pequeñas */
         @media screen and (max-width: 480px) {
             th, td {
                 padding: 6px 8px;
@@ -266,6 +264,10 @@
                 
                 tbody.appendChild(row);
             });
+
+            // Publicar la lista de MACs conectadas
+            const connectedMacs = Object.keys(devices).filter(mac => devices[mac].status === 'online');
+            heartbeatClient.publish("dispositivos/lista", JSON.stringify(connectedMacs));
         }
 
         function viewDevice(mac) {
