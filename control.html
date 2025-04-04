@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Servomotores MQTT</title>
+    <title>Control de Servomotor MQTT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos Generales */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -29,76 +28,39 @@
             color: var(--dark);
             line-height: 1.6;
             min-height: 100vh;
-            padding: 15px;
+            padding: 20px;
         }
         
         .container {
-            width: 100%;
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
         
-        /* Navegación */
-        nav {
-            background: var(--primary);
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px 20px;
-        }
-        
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        
-        nav a:hover, nav a.active {
-            background: var(--secondary);
-            transform: translateY(-2px);
-        }
-        
-        nav a i {
-            font-size: 1rem;
-        }
-        
-        /* Encabezado */
         header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
         
         h1 {
             color: var(--primary);
-            margin-bottom: 15px;
-            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
         
-        /* Estado de Conexión */
         #connection-status {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.95rem;
-            margin-top: 5px;
-            transition: all 0.3s;
+            font-weight: 500;
+            margin-top: 10px;
         }
         
         .connected {
@@ -111,54 +73,26 @@
             color: white;
         }
         
-        /* Contenedor de Servos */
-        .servo-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-        
-        /* Tarjeta de Servo */
         .servo-card {
             background: white;
             border-radius: 12px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s;
         }
         
-        .servo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-        
-        .servo-card h3 {
-            color: var(--secondary);
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        /* Control Deslizante */
         .servo-slider {
-            -webkit-appearance: none;
             width: 100%;
             height: 10px;
             border-radius: 5px;
             background: linear-gradient(to right, var(--danger), var(--success));
             outline: none;
             margin: 20px 0;
-            transition: opacity 0.2s;
+            -webkit-appearance: none;
         }
         
         .servo-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
             width: 25px;
             height: 25px;
             border-radius: 50%;
@@ -168,15 +102,13 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        /* Valor del Servo */
         .servo-value {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: bold;
             color: var(--primary);
             margin: 10px 0;
         }
         
-        /* Botones */
         .btn {
             background-color: var(--primary);
             color: white;
@@ -194,44 +126,15 @@
         
         .btn:hover {
             background-color: var(--secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .servo-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
             }
             
             .servo-card {
                 padding: 20px;
-            }
-            
-            nav a {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .servo-value {
-                font-size: 1.5rem;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-                padding: 12px;
             }
         }
     </style>
@@ -239,105 +142,105 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-cogs"></i> Control manual de alineación</h1>
-        <header>
-
-        <nav>
-            <a href="main.html"><i class="fas fa-home"></i> Inicio</a>
-            <a href="control.html" class="active"><i class="fas fa-robot"></i> Servos</a>
-            <a href="gps.html"><i class="fas fa-map-marked-alt"></i> Tracker GPS</a>
-            <a href="config.html"><i class="fas fa-cog"></i> Config</a>
-        </nav>
-        
-        <header>
+            <h1><i class="fas fa-robot"></i> Control de Servomotor</h1>
             <div id="connection-status" class="disconnected">
                 <i class="fas fa-plug"></i> Desconectado
             </div>
         </header>
         
-        <div class="servo-container">
-            <div class="servo-card">
-                <h3><i class="fas fa-robot"></i> Elevación</h3>
-                <input type="range" min="0" max="180" value="90" class="servo-slider" id="servo1">
-                <div class="servo-value" id="servo1-value">90°</div>
-                <button class="btn" onclick="centerServo('servo1')">
-                    <i class="fas fa-align-center"></i> Centrar
-                </button>
-            </div>
-            
-            <div class="servo-card">
-                <h3><i class="fas fa-robot"></i> Azimut</h3>
-                <input type="range" min="0" max="180" value="90" class="servo-slider" id="servo2">
-                <div class="servo-value" id="servo2-value">90°</div>
-                <button class="btn" onclick="centerServo('servo2')">
-                    <i class="fas fa-align-center"></i> Centrar
-                </button>
-            </div>
+        <div class="servo-card">
+            <h3><i class="fas fa-cog"></i> Posición del Servo</h3>
+            <input type="range" min="0" max="180" value="90" class="servo-slider" id="servo-control">
+            <div class="servo-value" id="servo-value">90°</div>
+            <button class="btn" onclick="centerServo()">
+                <i class="fas fa-align-center"></i> Centrar
+            </button>
+        </div>
+        
+        <div class="connection-info">
+            <p><strong>Configuración:</strong></p>
+            <p>Broker: <span id="broker-info">test.mosquitto.org</span></p>
+            <p>Tema: <span id="topic-info">iot/servos/control</span></p>
         </div>
     </div>
 
-    <!-- Script MQTT y Control -->
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <script>
         // Configuración MQTT
-        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+        const mqttOptions = {
+            clean: true,
+            connectTimeout: 4000,
+            clientId: 'web-client-' + Math.random().toString(16).substr(2, 8),
+        };
+        
+        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt", mqttOptions);
         const topic = "iot/servos/control";
         
         // Elementos UI
         const statusElement = document.getElementById("connection-status");
-        const sliders = document.querySelectorAll(".servo-slider");
+        const slider = document.getElementById("servo-control");
+        const valueDisplay = document.getElementById("servo-value");
         
         // Eventos MQTT
         client.on('connect', () => {
-            statusElement.className = "connected";
-            statusElement.innerHTML = '<i class="fas fa-plug"></i> Conectado al Broker';
+            updateStatus('connected', '<i class="fas fa-plug"></i> Conectado al broker');
             console.log("Conectado a MQTT");
         });
         
         client.on('error', (err) => {
-            statusElement.className = "disconnected";
-            statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+            updateStatus('error', '<i class="fas fa-exclamation-triangle"></i> Error de conexión');
             console.error("Error MQTT:", err);
         });
         
         client.on('offline', () => {
-            statusElement.className = "disconnected";
-            statusElement.innerHTML = '<i class="fas fa-plug"></i> Desconectado';
+            updateStatus('disconnected', '<i class="fas fa-plug"></i> Desconectado');
         });
         
-        // Control de Servos
-        sliders.forEach(slider => {
-            const valueElement = document.getElementById(`${slider.id}-value`);
-            
-            slider.addEventListener('input', () => {
-                const angle = slider.value;
-                valueElement.textContent = `${angle}°`;
-                
-                // Enviar comando MQTT
-                const message = JSON.stringify({
-                    device: slider.id,
-                    angle: parseInt(angle),
-                    timestamp: new Date().toISOString()
-                });
-                
-                client.publish(topic, message);
-                console.log("Enviado:", message);
+        // Control del servo
+        slider.addEventListener('input', () => {
+            const angle = slider.value;
+            valueDisplay.textContent = `${angle}°`;
+            sendServoPosition(angle);
+        });
+        
+        function sendServoPosition(angle) {
+            const message = JSON.stringify({
+                device: 'servo1',
+                angle: parseInt(angle),
+                timestamp: new Date().toISOString()
             });
-        });
+            
+            client.publish(topic, message, { qos: 1 }, (err) => {
+                if (!err) {
+                    console.log("Ángulo enviado:", angle);
+                } else {
+                    console.error("Error al enviar:", err);
+                }
+            });
+        }
         
-        // Centrar Servo
-        function centerServo(servoId) {
-            const slider = document.getElementById(servoId);
+        function centerServo() {
             slider.value = 90;
             slider.dispatchEvent(new Event('input'));
         }
         
-        // Cargar valores iniciales
+        function updateStatus(status, text) {
+            statusElement.className = status;
+            statusElement.innerHTML = text;
+            
+            // Actualizar colores según estado
+            if (status === 'connected') {
+                statusElement.classList.add('connected');
+                statusElement.classList.remove('disconnected');
+            } else {
+                statusElement.classList.add('disconnected');
+                statusElement.classList.remove('connected');
+            }
+        }
+        
+        // Inicialización
         window.addEventListener('DOMContentLoaded', () => {
-            sliders.forEach(slider => {
-                const valueElement = document.getElementById(`${slider.id}-value`);
-                valueElement.textContent = `${slider.value}°`;
-            });
+            valueDisplay.textContent = `${slider.value}°`;
         });
     </script>
 </body>
