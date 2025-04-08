@@ -385,25 +385,27 @@
                 }
                 
                 if (topic === "iotlab/pairing/response") {
-                    if (data.status === "PAIRED") {
-                        updateDevice({
-                            mac: data.slave_mac,
-                            paired_with: data.master_mac,
-                            status: "active"
-                        });
-                        updateDevice({
-                            mac: data.master_mac,
-                            paired_with: data.slave_mac,
-                            status: "active"
-                        });
-                        alert(`Emparejamiento exitoso: ${data.slave_mac} ↔ ${data.master_mac}`);
-                    }
-                }
-            } catch (e) {
-                console.error("Error al procesar mensaje:", e);
-            }
+    if (data.status === "PAIRED") {
+        // Actualizar ambos dispositivos (maestro y esclavo)
+        updateDevice({
+            mac: data.slave_mac,
+            paired_with: data.master_mac,
+            status: "active",
+            role: "SLAVE" // Asegurar que el rol se mantiene
         });
-        
+        updateDevice({
+            mac: data.master_mac,
+            paired_with: data.slave_mac,
+            status: "active",
+            role: "MASTER" // Asegurar que el rol se mantiene
+        });
+        showDataAlert({
+            type: "emparejamiento",
+            message: `Emparejamiento exitoso: ${data.slave_mac} ↔ ${data.master_mac}`
+        });
+    }
+}
+                
         // Actualizar estado de conexión en la UI
         function updateConnectionStatus(status, text) {
             statusElement.className = `status-indicator ${status}`;
