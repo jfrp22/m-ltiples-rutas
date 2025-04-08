@@ -240,6 +240,17 @@
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     
     <script>
+        // =============================================
+        // CONFIGURACIÓN MQTT - MODIFICAR ESTOS VALORES
+        // =============================================
+        const gpsTopic = "iotlab/gps/data";          // Tópico para datos GPS
+        const macListTopic = "iotlab/nodes/status";  // Tópico para lista de dispositivos
+        const mqttBrokerUrl = "wss://test.mosquitto.org:8081/mqtt"; // URL del broker MQTT
+        
+        // =============================================
+        // FIN DE CONFIGURACIÓN - NO MODIFICAR LO SIGUIENTE
+        // =============================================
+
         // Objeto para almacenar los dispositivos y sus marcadores
         const devices = {};
         let map;
@@ -255,17 +266,14 @@
             clientId: 'tracker_' + Math.random().toString(16).substr(2, 8)
         };
         
-        const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt", options);
-        
-        const gpsTopic = "gps/tracker";
-        const macListTopic = "dispositivos/lista";
+        const client = mqtt.connect(mqttBrokerUrl, options);
         const connStatus = document.getElementById("connection-status");
         const deviceButtonsContainer = document.getElementById("device-buttons");
         
         // Inicializar mapa
         function initMap() {
-                map = L.map('map').setView([10.4806, -66.9036], 10); // Centro inicial en Venezuela
-            
+            map = L.map('map').setView([10.4806, -66.9036], 10); // Centro inicial en Venezuela
+        
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 19
@@ -388,11 +396,25 @@
         client.on('message', (topic, message) => {
             try {
                 if (topic === macListTopic) {
-                    // Recibimos la lista de MACs conectadas
-                    const macList = JSON.parse(message.toString());
+                    // Procesar mensaje de lista de dispositivos
+                    const data = JSON.parse(message.toString());
+                    
+                    // Extraer lista de MACs (ajustar según formato del mensaje)
+                    let macList = [];
+                    if (Array.isArray(data)) {
+                        // Si el mensaje es un array directo de MACs
+                        macList = data;
+                    } else if (data.devices) {
+                        // Si el mensaje es un objeto con propiedad 'devices'
+                        macList = data.devices;
+                    } else if (data.mac) {
+                        // Si es un mensaje individual
+                        macList = [data.mac];
+                    }
+                    
                     console.log("Dispositivos conectados recibidos:", macList);
                     
-                    // Podemos usar esta información para resaltar dispositivos conectados
+                    // Actualizar indicadores de conexión
                     Object.keys(devices).forEach(mac => {
                         const isConnected = macList.includes(mac);
                         devices[mac].button.innerHTML = `
@@ -405,15 +427,24 @@
                 } else if (topic === gpsTopic) {
                     // Procesar datos GPS
                     const data = JSON.parse(message.toString());
-                    const mac = data.mac;
+                    
+                    // Extraer datos (ajustar según formato del mensaje)
+                    const mac = data.mac || data.deviceId;
+                    const gpsData = {
+                        mac: mac,
+                        lat: data.lat || data.latitude,
+                        lng: data.lng || data.longitude,
+                        alt: data.alt || data.altitude || 0,
+                        sats: data.sats || data.satellites || 0
+                    };
                     
                     if (!mac) {
                         console.error("Mensaje sin identificador MAC");
                         return;
                     }
                     
-                    console.log("Datos GPS recibidos de:", mac, data);
-                    updateDeviceMarker(mac, data);
+                    console.log("Datos GPS recibidos de:", mac, gpsData);
+                    updateDeviceMarker(mac, gpsData);
                 }
             } catch (e) {
                 console.error("Error al procesar mensaje:", e);
