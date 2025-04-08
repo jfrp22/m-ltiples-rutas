@@ -38,6 +38,38 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             padding: 20px;
         }
+
+
+        nav {
+            background: var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        nav a i {
+            font-size: 1rem;
+        }
         
         header {
             text-align: center;
@@ -259,6 +291,17 @@
             th, td {
                 padding: 8px 10px;
                 font-size: 14px;
+            }
+            }
+                  @media (max-width: 480px) {
+            nav {
+                gap: 8px;
+                padding: 10px;
+            }
+            
+            nav a {
+                padding: 5px 8px;
+                font-size: 0.85rem;
             }
         }
     </style>
