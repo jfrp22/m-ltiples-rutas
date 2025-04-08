@@ -441,10 +441,10 @@
         }
 
         // Detectar preferencia de modo oscuro
-        //function detectColorScheme() {
-            //if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              //  document.body.classList.add('dark-mode');
-            //}
+        function detectColorScheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('dark-mode');
+            }
             
             // Escuchar cambios en la preferencia
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
